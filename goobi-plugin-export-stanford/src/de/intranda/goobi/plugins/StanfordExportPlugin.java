@@ -50,18 +50,21 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public boolean startExport(Process process) throws IOException, InterruptedException, DocStructHasNoTypeException, PreferencesException,
             WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
             TypeNotAllowedForParentException {
-        // TODO get from configuration?
-        return startExport(process, "/assembly");
+
+        return startExport(process, null);
     }
 
     @Override
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
-        Path exportfolder;
+
+        destination = process.getProjekt().getDmsImportRootPath();
+        Path exportRootFolder;
         String objectId = null;
         String contentType = null;
         String resourceType = null;
+        String assemblyWF = "assemblyWF";
         for (Processproperty property : process.getEigenschaften()) {
             if (property.getTitel().equalsIgnoreCase("objectId")) {
                 objectId = property.getWert();
@@ -81,7 +84,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             log.error("No contentType found, export canceled: " + process.getTitel());
             return false;
         }
-
+        String originalObjectId = objectId;
         if (objectId.contains(":")) {
             objectId = objectId.substring(objectId.indexOf(":") + 1);
         }
@@ -90,14 +93,18 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             //            String secondPart = objectId.substring(2, 5);
             //            String thirdPart = objectId.substring(5, 7);
             //            String forthPart = objectId.substring(7);
-            exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(7),
-                    objectId, "content");
+            exportRootFolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId
+                    .substring(7), objectId);
         } else {
             Helper.setFehlerMeldung("ObjectId has unexpected length, aborting.");
             log.error("ObjectId has unexpected length, export canceled: " + process.getTitel());
             return false;
         }
+        Path exportfolder = Paths.get(exportRootFolder.toString(), "content");
+        Path metadatafolder = Paths.get(exportRootFolder.toString(), "metadata");
+
         Files.createDirectories(exportfolder);
+        Files.createDirectories(metadatafolder);
         List<String> imageFileNames = null;
         List<String> txtFileNames = null;
         List<String> pdfFileNames = null;
@@ -130,12 +137,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         // save xml file
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        xmlOutput.output(document, new FileWriter(Paths.get(exportfolder.toString(), "contentMetadata.xml").toString()));
+        xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), "contentMetadata.xml").toString()));
 
         // call api
 
-        //        String apiURL = process.getProjekt().getDmsImportErrorPath();
+        String apiBaseUrl = process.getProjekt().getDmsImportImagesPath() + originalObjectId + "apo_workflows/" + assemblyWF;
 
+        log.info("Would call now " + apiBaseUrl);
         return true;
     }
 

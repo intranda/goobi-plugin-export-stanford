@@ -240,4 +240,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public void setExportImages(boolean exportImages) {
     }
 
+    public String getDescription() {
+        return getTitle();
+    }
 }

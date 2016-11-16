@@ -180,6 +180,8 @@
 
 		<echo>Generating jar file: ${dir.deploy}/${filename}-${git.revision}.jar</echo>
 		<antcall target="jar" />
+	    
+	    <copy file="plugin_StanfordExportPlugin.xml" todir="${dir.deploy}" />
 	</target>
 
 	<!-- ================================= 

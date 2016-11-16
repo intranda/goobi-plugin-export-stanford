@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.commons.configuration.XMLConfiguration;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
 import org.goobi.production.enums.PluginType;
@@ -17,6 +18,7 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
+import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.NIOFileUtils;
 import de.sub.goobi.helper.exceptions.DAOException;
@@ -58,13 +60,18 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
-
-        destination = process.getProjekt().getDmsImportRootPath();
-        Path exportRootFolder;
+        
+        XMLConfiguration config = ConfigPlugins.getPluginConfig(this);
+        destination = config.getString("destination", "/tmp");
+        String assemblyWF = config.getString("assemblyWF", "assemblyWF");
+        String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
+        String apiBaseUrl = config.getString("apiBaseUrl", "http://example.com/");
+        
         String objectId = null;
         String contentType = null;
         String resourceType = null;
-        String assemblyWF = "assemblyWF";
+        Path exportRootFolder;
+        
         for (Processproperty property : process.getEigenschaften()) {
             if (property.getTitel().equalsIgnoreCase("objectId")) {
                 objectId = property.getWert();
@@ -137,13 +144,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         // save xml file
         XMLOutputter xmlOutput = new XMLOutputter();
         xmlOutput.setFormat(Format.getPrettyFormat());
-        xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), "contentMetadata.xml").toString()));
+        xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), metadataFileName).toString()));
 
         // call api
 
-        String apiBaseUrl = process.getProjekt().getDmsImportImagesPath() + originalObjectId + "apo_workflows/" + assemblyWF;
+        String url =  apiBaseUrl  + originalObjectId + "/apo_workflows/" + assemblyWF;
 
-        log.info("Would call now " + apiBaseUrl);
+        log.info("Would call now " + url);
         return true;
     }
 

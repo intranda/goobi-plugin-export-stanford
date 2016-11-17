@@ -38,6 +38,13 @@ import ugh.exceptions.WriteException;
 @Log4j
 public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
+    private static final String contentString = "content";
+    private static final String typeString = "type";
+    private static final String nameString = "name";
+    private static final String fileString = "file";
+    private static final String labelString = "label";
+    private static final String resourceString = "resource";
+
     @Override
     public PluginType getType() {
         return PluginType.Export;
@@ -60,18 +67,18 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
-        
+
         XMLConfiguration config = ConfigPlugins.getPluginConfig(this);
         destination = config.getString("destination", "/tmp");
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
         String apiBaseUrl = config.getString("apiBaseUrl", "http://example.com/");
-        
+
         String objectId = null;
         String contentType = null;
         String resourceType = null;
         Path exportRootFolder;
-        
+
         for (Processproperty property : process.getEigenschaften()) {
             if (property.getTitel().equalsIgnoreCase("objectId")) {
                 objectId = property.getWert();
@@ -148,18 +155,11 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         // call api
 
-        String url =  apiBaseUrl  + originalObjectId + "/apo_workflows/" + assemblyWF;
+        String url = apiBaseUrl + originalObjectId + "/apo_workflows/" + assemblyWF;
 
         log.info("Would call now " + url);
         return true;
     }
-
-    private static final String contentString = "content";
-    private static final String typeString = "type";
-    private static final String nameString = "name";
-    private static final String fileString = "file";
-    private static final String labelString = "label";
-    private static final String resourceString = "resource";
 
     private Document createMetadataFile(String contentType, String resourceType, List<String> imageFileNames, List<String> txtFileNames,
             List<String> pdfFileNames) {
@@ -168,22 +168,9 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Element content = new Element(contentString);
 
         doc.setRootElement(content);
-        // TODO book_with_pdf, book_as_image inclear
 
-        if (contentType.equals("image")) {
-            content.setAttribute(typeString, "simple_image");
-        } else if (contentType.equals("file")) {
-            content.setAttribute(typeString, "file");
-        } else if (contentType.equals("book")) {
-            content.setAttribute(typeString, "simple_book");
+        content.setAttribute(typeString, contentType);
 
-        } else if (contentType.equals("map")) {
-            content.setAttribute(typeString, "map");
-        } else {
-            // default value is simple_image 
-            content.setAttribute(typeString, "simple_image");
-        }
-        // TODO set publish="true" preserve="true" shelve="true" ?
         if (imageFileNames != null) {
 
             if (txtFileNames != null && imageFileNames.size() == txtFileNames.size()) {

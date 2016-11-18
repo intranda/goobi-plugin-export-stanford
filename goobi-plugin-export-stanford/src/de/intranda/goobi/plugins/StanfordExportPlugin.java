@@ -7,6 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+
 import org.apache.commons.configuration.XMLConfiguration;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
@@ -154,10 +158,11 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), metadataFileName).toString()));
 
         // call api
+        Client client = ClientBuilder.newClient();
+        WebTarget base = client.target(apiBaseUrl);
+        WebTarget target = base.path(originalObjectId).path("apo_workflows").path(assemblyWF);
+        target.request().post(null);
 
-        String url = apiBaseUrl + originalObjectId + "/apo_workflows/" + assemblyWF;
-
-        log.info("Would call now " + url);
         return true;
     }
 

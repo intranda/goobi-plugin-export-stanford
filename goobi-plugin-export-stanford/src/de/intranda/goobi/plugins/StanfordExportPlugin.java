@@ -9,9 +9,14 @@ import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
 import org.goobi.production.enums.PluginType;
@@ -77,6 +82,8 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
         String apiBaseUrl = config.getString("apiBaseUrl", "http://example.com/");
+        String username = config.getString("username", "");
+        String password = config.getString("password", "");
 
         String objectId = null;
         String contentType = null;
@@ -161,7 +168,20 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
         WebTarget target = base.path(originalObjectId).path("apo_workflows").path(assemblyWF);
-        target.request().post(null);
+        Builder requestBuilder = target.request();
+        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+            String token = username + ":" + password;
+            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));
+            requestBuilder.header("Authorization", authenticationCode);
+        }
+        Response response = requestBuilder.post(null);
+        StatusType type = response.getStatusInfo();
+        int statuscode = type.getStatusCode();
+        if (statuscode >= 200 && statuscode < 300) {
+            Helper.setMeldung("API call was successful: " + type.getReasonPhrase() + "(" + type.getStatusCode() + ")");
+        } else {
+            Helper.setFehlerMeldung("Something went wrong: " + type.getReasonPhrase() + "(" + type.getStatusCode() + ")");
+        }
 
         return true;
     }

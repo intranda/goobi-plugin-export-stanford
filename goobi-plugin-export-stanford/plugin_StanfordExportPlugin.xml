@@ -4,4 +4,6 @@
 	<assemblyWFName>assemblyWF</assemblyWFName>	
 	<metadataFileName>stubContentMetadata.xml</metadataFileName>
 	<apiBaseUrl>http://example.com/</apiBaseUrl>
+    <username></username>
+    <password></password>
 </config_plugin>

@@ -178,9 +178,9 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         StatusType type = response.getStatusInfo();
         int statuscode = type.getStatusCode();
         if (statuscode >= 200 && statuscode < 300) {
-            Helper.setMeldung("API call was successful: " + type.getReasonPhrase() + "(" + type.getStatusCode() + ")");
+            Helper.setMeldung("API call was successful: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
         } else {
-            Helper.setFehlerMeldung("Something went wrong: " + type.getReasonPhrase() + "(" + type.getStatusCode() + ")");
+            Helper.setFehlerMeldung("Something went wrong: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
         }
 
         return true;

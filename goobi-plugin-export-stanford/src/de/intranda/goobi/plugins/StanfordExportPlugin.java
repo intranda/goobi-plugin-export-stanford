@@ -179,11 +179,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         int statuscode = type.getStatusCode();
         if (statuscode >= 200 && statuscode < 300) {
             Helper.setMeldung("API call was successful: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
+            return true;
         } else {
             Helper.setFehlerMeldung("Something went wrong: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
+            return false;
         }
 
-        return true;
+        
     }
 
     private Document createMetadataFile(String contentType, String resourceType, List<String> imageFileNames, List<String> txtFileNames,

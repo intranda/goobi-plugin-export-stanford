@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -164,6 +165,11 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         xmlOutput.setFormat(Format.getPrettyFormat());
         xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), metadataFileName).toString()));
 
+        int delay = config.getInt("delay", 0);
+        if (delay > 0) {
+            TimeUnit.SECONDS.sleep(delay);
+        }
+
         // call api
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
@@ -185,7 +191,6 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             return false;
         }
 
-        
     }
 
     private Document createMetadataFile(String contentType, String resourceType, List<String> imageFileNames, List<String> txtFileNames,

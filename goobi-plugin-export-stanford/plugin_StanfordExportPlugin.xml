@@ -4,6 +4,7 @@
 	<assemblyWFName>assemblyWF</assemblyWFName>	
 	<metadataFileName>stubContentMetadata.xml</metadataFileName>
 	<apiBaseUrl>http://example.com/</apiBaseUrl>
-    <username></username>
-    <password></password>
+    <username>X</username>
+    <password>Y</password>
+    <delay>10</delay>
 </config_plugin>

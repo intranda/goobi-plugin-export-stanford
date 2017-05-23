@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -54,6 +55,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     private static final String fileString = "file";
     private static final String labelString = "label";
     private static final String resourceString = "resource";
+    private List<String> problems = new ArrayList<>();
 
     @Override
     public PluginType getType() {
@@ -77,7 +79,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
-
+    	problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(this);
         destination = config.getString("destination", "/tmp");
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
@@ -103,11 +105,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         if (objectId == null) {
             Helper.setFehlerMeldung("No objectId found, aborting.");
             log.error("No objectId found, export canceled: " + process.getTitel());
+            problems.add("No objectId found, export canceled: " + process.getTitel());
             return false;
         }
         if (contentType == null) {
             Helper.setFehlerMeldung("No contentType found, aborting");
             log.error("No contentType found, export canceled: " + process.getTitel());
+            problems.add("No contentType found, export canceled: " + process.getTitel());
             return false;
         }
         String originalObjectId = objectId;
@@ -124,6 +128,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         } else {
             Helper.setFehlerMeldung("ObjectId has unexpected length, aborting.");
             log.error("ObjectId has unexpected length, export canceled: " + process.getTitel());
+            problems.add("ObjectId has unexpected length, export canceled: " + process.getTitel());
             return false;
         }
         Path exportfolder = Paths.get(exportRootFolder.toString(), "content");
@@ -188,6 +193,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             return true;
         } else {
             Helper.setFehlerMeldung("Something went wrong: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
+            problems.add("Something went wrong: " + type.getReasonPhrase() + " (" + type.getStatusCode() + ")");
             return false;
         }
 
@@ -277,4 +283,9 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public String getDescription() {
         return getTitle();
     }
+
+	@Override
+	public List<String> getProblems() {
+		return problems;
+	}
 }

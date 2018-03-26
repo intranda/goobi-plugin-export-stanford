@@ -148,17 +148,17 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         }
         // copy all txt files from ocr folder
 
-        Path ocrFolder = Paths.get(process.getTxtDirectory());
+        Path ocrFolder = Paths.get(process.getOcrTxtDirectory());
         if (Files.exists(ocrFolder)) {
             NIOFileUtils.copyDirectory(ocrFolder, exportfolder);
-            txtFileNames = NIOFileUtils.list(process.getTxtDirectory(), NIOFileUtils.fileFilter);
+            txtFileNames = NIOFileUtils.list(process.getOcrTxtDirectory(), NIOFileUtils.fileFilter);
         }
 
         // copy pdf file
-        Path pdfFolder = Paths.get(process.getPdfDirectory());
+        Path pdfFolder = Paths.get(process.getOcrPdfDirectory());
         if (Files.exists(pdfFolder)) {
             NIOFileUtils.copyDirectory(pdfFolder, exportfolder);
-            pdfFileNames = NIOFileUtils.list(process.getPdfDirectory(), NIOFileUtils.fileFilter);
+            pdfFileNames = NIOFileUtils.list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
         }
 
         // create metadata file
@@ -228,6 +228,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
                     imageFile.setAttribute(nameString, imageName);
                     txtFile.setAttribute(nameString, txtName);
+                    txtFile.setAttribute("role", "transcription");
                     resource.addContent(label);
                     resource.addContent(imageFile);
                     resource.addContent(txtFile);

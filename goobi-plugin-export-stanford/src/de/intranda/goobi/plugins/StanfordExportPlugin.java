@@ -137,7 +137,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Files.createDirectories(exportfolder);
         Files.createDirectories(metadatafolder);
         List<String> imageFileNames = null;
-        List<String> txtFileNames = null;
+        List<String> altoFileNames = null;
         List<String> pdfFileNames = null;
         // copy all images from media folder
 
@@ -148,10 +148,10 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         }
         // copy all txt files from ocr folder
 
-        Path ocrFolder = Paths.get(process.getOcrTxtDirectory());
+        Path ocrFolder = Paths.get(process.getOcrAltoDirectory());
         if (Files.exists(ocrFolder)) {
             NIOFileUtils.copyDirectory(ocrFolder, exportfolder);
-            txtFileNames = NIOFileUtils.list(process.getOcrTxtDirectory(), NIOFileUtils.fileFilter);
+            altoFileNames = NIOFileUtils.list(process.getOcrAltoDirectory(), NIOFileUtils.fileFilter);
         }
 
         // copy pdf file
@@ -163,7 +163,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         // create metadata file
 
-        Document document = createMetadataFile(contentType, resourceType, imageFileNames, txtFileNames, pdfFileNames);
+        Document document = createMetadataFile(contentType, resourceType, imageFileNames, altoFileNames, pdfFileNames);
 
         // save xml file
         XMLOutputter xmlOutput = new XMLOutputter();

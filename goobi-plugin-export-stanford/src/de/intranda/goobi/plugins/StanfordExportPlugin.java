@@ -64,7 +64,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     @Override
     public String getTitle() {
-        return "plugin-intranda-export-stanford";
+        return "intranda_export_stanford";
     }
 
     @Override
@@ -80,7 +80,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
     	problems = new ArrayList<>();
-        XMLConfiguration config = ConfigPlugins.getPluginConfig(this);
+        XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
         destination = config.getString("destination", "/tmp");
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");

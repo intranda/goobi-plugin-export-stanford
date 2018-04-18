@@ -79,7 +79,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
             PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
             SwapException, DAOException, TypeNotAllowedForParentException {
-    	problems = new ArrayList<>();
+        problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
         destination = config.getString("destination", "/tmp");
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
@@ -229,6 +229,9 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
                     imageFile.setAttribute(nameString, imageName);
                     txtFile.setAttribute(nameString, txtName);
                     txtFile.setAttribute("role", "transcription");
+                    txtFile.setAttribute("publish", "yes");
+                    txtFile.setAttribute("preserve", "yes");
+                    txtFile.setAttribute("shelve", "yes");
                     resource.addContent(label);
                     resource.addContent(imageFile);
                     resource.addContent(txtFile);
@@ -285,8 +288,8 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         return getTitle();
     }
 
-	@Override
-	public List<String> getProblems() {
-		return problems;
-	}
+    @Override
+    public List<String> getProblems() {
+        return problems;
+    }
 }

@@ -175,7 +175,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         if (tempDestination!=null && tempDestination.length()>0) {
 	        xmlOutput = new XMLOutputter();
 	        xmlOutput.setFormat(Format.getPrettyFormat());
-	        xmlOutput.output(document, new FileWriter(Paths.get(tempDestination, objectId).toString()));
+	        xmlOutput.output(document, new FileWriter(Paths.get(tempDestination, "dor_export_" + objectId + ".xml").toString()));
         }
         
         int delay = config.getInt("delay", 0);

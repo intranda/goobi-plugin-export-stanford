@@ -81,6 +81,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             SwapException, DAOException, TypeNotAllowedForParentException {
         problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
+        String tempDestination = config.getString("tempDestination", "");
         destination = config.getString("destination", "/tmp");
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
@@ -170,6 +171,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         xmlOutput.setFormat(Format.getPrettyFormat());
         xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), metadataFileName).toString()));
 
+        // if the xml shall be saved additional into a temporary folder
+        if (tempDestination!=null && tempDestination.length()>0) {
+	        xmlOutput = new XMLOutputter();
+	        xmlOutput.setFormat(Format.getPrettyFormat());
+	        xmlOutput.output(document, new FileWriter(Paths.get(tempDestination, objectId).toString()));
+        }
+        
         int delay = config.getInt("delay", 0);
         if (delay > 0) {
             TimeUnit.SECONDS.sleep(delay);

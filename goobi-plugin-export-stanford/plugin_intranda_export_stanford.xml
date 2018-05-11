@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config_plugin>
+	<!-- this additional temporary destination folder can stay empty to get ignored -->
+	<tempDestination>/tmp</tempDestination>
+	<!-- this is the main folder where the result is exported to -->
 	<destination>/tmp</destination>
 	<assemblyWFName>assemblyWF</assemblyWFName>	
 	<metadataFileName>stubContentMetadata.xml</metadataFileName>

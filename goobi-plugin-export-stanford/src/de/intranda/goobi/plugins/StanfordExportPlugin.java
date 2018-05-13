@@ -1,5 +1,6 @@
 package de.intranda.goobi.plugins;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,6 +20,8 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.util.PDFMergerUtility;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
 import org.goobi.production.enums.PluginType;
@@ -147,24 +150,28 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             NIOFileUtils.copyDirectory(imageMediaFolder, exportfolder);
             imageFileNames = NIOFileUtils.list(process.getImagesTifDirectory(false), NIOFileUtils.fileFilter);
         }
-        // copy all txt files from ocr folder
-
+        
+        // copy all alto files from ocr folder
         Path ocrFolder = Paths.get(process.getOcrAltoDirectory());
         if (Files.exists(ocrFolder)) {
             NIOFileUtils.copyDirectory(ocrFolder, exportfolder);
             altoFileNames = NIOFileUtils.list(process.getOcrAltoDirectory(), NIOFileUtils.fileFilter);
         }
 
-        // copy pdf file
+        // copy all pdf files
         Path pdfFolder = Paths.get(process.getOcrPdfDirectory());
         if (Files.exists(pdfFolder)) {
             NIOFileUtils.copyDirectory(pdfFolder, exportfolder);
             pdfFileNames = NIOFileUtils.list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
         }
+        
+        // generate one big pdf for all single page PDFs
+        if (pdfFileNames!=null && pdfFileNames.size()>0) {
+            mergePdfFiles(pdfFolder, pdfFileNames, exportfolder, objectId);
+        }
 
         // create metadata file
-
-        Document document = createMetadataFile(contentType, resourceType, imageFileNames, altoFileNames, pdfFileNames);
+        Document document = createMetadataFile(contentType, resourceType, imageFileNames, altoFileNames, pdfFileNames, objectId);
 
         // save xml file
         XMLOutputter xmlOutput = new XMLOutputter();
@@ -207,8 +214,19 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     }
 
-    private Document createMetadataFile(String contentType, String resourceType, List<String> imageFileNames, List<String> txtFileNames,
-            List<String> pdfFileNames) {
+    /**
+     * create the metadata xml file for the images, the alto and the pdf files
+     * 
+     * @param contentType
+     * @param resourceType
+     * @param imageFileNames
+     * @param altoFileNames
+     * @param pdfFileNames
+     * @param objectId
+     * @return
+     */
+    private Document createMetadataFile(String contentType, String resourceType, List<String> imageFileNames, List<String> altoFileNames,
+            List<String> pdfFileNames, String objectId) {
         Document doc = new Document();
 
         Element content = new Element(contentString);
@@ -219,30 +237,38 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         if (imageFileNames != null) {
 
-            if (txtFileNames != null && imageFileNames.size() == txtFileNames.size()) {
+            if (altoFileNames != null && imageFileNames.size() == altoFileNames.size()) {
 
                 for (int index = 0; index < imageFileNames.size(); index++) {
-                    String imageName = imageFileNames.get(index);
-                    String txtName = txtFileNames.get(index);
-
                     Element resource = new Element(resourceString);
                     content.addContent(resource);
 
-                    // create Label?
+                    // create image entry
                     Element label = new Element(labelString);
-                    Element imageFile = new Element(fileString);
-                    Element txtFile = new Element(fileString);
                     label.setText("Page " + (index + 1));
-
+                    String imageName = imageFileNames.get(index);
+                    Element imageFile = new Element(fileString);
                     imageFile.setAttribute(nameString, imageName);
-                    txtFile.setAttribute(nameString, txtName);
-                    txtFile.setAttribute("role", "transcription");
-                    txtFile.setAttribute("publish", "yes");
-                    txtFile.setAttribute("preserve", "yes");
-                    txtFile.setAttribute("shelve", "yes");
                     resource.addContent(label);
                     resource.addContent(imageFile);
-                    resource.addContent(txtFile);
+
+                    // create pdf entry
+                    if (pdfFileNames != null) {
+                        String pdfName = pdfFileNames.get(index);
+                        Element pdfFile = new Element(fileString);
+                        pdfFile.setAttribute(nameString, pdfName);
+                        resource.addContent(pdfFile);
+                    }
+                    
+                    // create alto entry
+                    String altoName = altoFileNames.get(index);
+                    Element altoFile = new Element(fileString);
+                    altoFile.setAttribute(nameString, altoName);
+                    altoFile.setAttribute("role", "transcription");
+                    altoFile.setAttribute("publish", "yes");
+                    altoFile.setAttribute("preserve", "yes");
+                    altoFile.setAttribute("shelve", "yes");
+                    resource.addContent(altoFile);
                 }
 
             } else {
@@ -259,18 +285,52 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         }
 
+        // add one pdf entry for the all-pages-pdf
         if (pdfFileNames != null) {
             Element resource = new Element(resourceString);
             Element file = new Element(fileString);
-            file.setAttribute(nameString, pdfFileNames.get(0));
+            file.setAttribute(nameString, objectId + ".pdf");
             resource.addContent(file);
-
             content.addContent(resource);
         }
 
         return doc;
     }
 
+    /**
+     * Merge multiple PDF files into one single file
+     * 
+     * @param pdfFolder
+     * @param pdfFileNames
+     * @param exportPath
+     * @param objectId
+     * @throws IOException
+     */
+    private void mergePdfFiles(Path pdfFolder, List<String> pdfFileNames, Path exportPath, String objectId)
+            throws IOException {
+        try {
+            List<PDDocument> pdocs = new ArrayList<>();
+            PDFMergerUtility PDFmerger = new PDFMergerUtility();
+            String exportPdf = exportPath.toString() + File.separator + objectId + ".pdf";
+            PDFmerger.setDestinationFileName(exportPdf);
+            // all all pdf files
+            for (String pdf : pdfFileNames) {
+                File file = new File(pdfFolder.toFile(), pdf);
+                PDDocument doc = PDDocument.load(file);
+                pdocs.add(doc);
+                PDFmerger.addSource(file);
+            }
+            // merge the pdf files now
+            PDFmerger.mergeDocuments();
+            //Closing the documents
+            for (PDDocument doc : pdocs) {
+                doc.close();
+            }
+        } catch (Exception e) {
+            throw new IOException("Error occured during the merge to a single PDF file", e);
+        }
+    }
+    
     public static void main(String[] args) {
         String objectId = "druid:bb018zb8894";
         if (objectId.contains(":")) {

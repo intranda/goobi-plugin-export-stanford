@@ -35,6 +35,7 @@ import org.jdom2.output.XMLOutputter;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.NIOFileUtils;
+import de.sub.goobi.helper.StorageProvider;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.ExportFileException;
 import de.sub.goobi.helper.exceptions.SwapException;
@@ -147,22 +148,22 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         Path imageMediaFolder = Paths.get(process.getImagesTifDirectory(false));
         if (Files.exists(imageMediaFolder)) {
-            NIOFileUtils.copyDirectory(imageMediaFolder, exportfolder);
-            imageFileNames = NIOFileUtils.list(process.getImagesTifDirectory(false), NIOFileUtils.fileFilter);
+            StorageProvider.getInstance().copyDirectory(imageMediaFolder, exportfolder);
+            imageFileNames = StorageProvider.getInstance().list(process.getImagesTifDirectory(false), NIOFileUtils.fileFilter);
         }
         
         // copy all alto files from ocr folder
         Path ocrFolder = Paths.get(process.getOcrAltoDirectory());
         if (Files.exists(ocrFolder)) {
-            NIOFileUtils.copyDirectory(ocrFolder, exportfolder);
-            altoFileNames = NIOFileUtils.list(process.getOcrAltoDirectory(), NIOFileUtils.fileFilter);
+        	StorageProvider.getInstance().copyDirectory(ocrFolder, exportfolder);
+            altoFileNames = StorageProvider.getInstance().list(process.getOcrAltoDirectory(), NIOFileUtils.fileFilter);
         }
 
         // copy all pdf files
         Path pdfFolder = Paths.get(process.getOcrPdfDirectory());
         if (Files.exists(pdfFolder)) {
-            NIOFileUtils.copyDirectory(pdfFolder, exportfolder);
-            pdfFileNames = NIOFileUtils.list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
+        	StorageProvider.getInstance().copyDirectory(pdfFolder, exportfolder);
+            pdfFileNames = StorageProvider.getInstance().list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
         }
         
         // generate one big pdf for all single page PDFs

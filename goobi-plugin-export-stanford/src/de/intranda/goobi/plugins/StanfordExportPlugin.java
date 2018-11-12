@@ -3,6 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -310,23 +311,16 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     private void mergePdfFiles(Path pdfFolder, List<String> pdfFileNames, Path exportPath, String objectId)
             throws IOException {
         try {
-            List<PDDocument> pdocs = new ArrayList<>();
             PDFMergerUtility PDFmerger = new PDFMergerUtility();
             String exportPdf = exportPath.toString() + File.separator + objectId + ".pdf";
             PDFmerger.setDestinationFileName(exportPdf);
-            // all all pdf files
+            // add all pdf files
             for (String pdf : pdfFileNames) {
                 File file = new File(pdfFolder.toFile(), pdf);
-                PDDocument doc = PDDocument.load(file);
-                pdocs.add(doc);
-                PDFmerger.addSource(file);
+            		PDFmerger.addSource(file);
             }
             // merge the pdf files now
             PDFmerger.mergeDocuments();
-            //Closing the documents
-            for (PDDocument doc : pdocs) {
-                doc.close();
-            }
         } catch (Exception e) {
             throw new IOException("Error occured during the merge to a single PDF file", e);
         }

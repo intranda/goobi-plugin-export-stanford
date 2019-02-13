@@ -3,7 +3,6 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +20,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFMergerUtility;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
@@ -74,16 +72,16 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     @Override
     public boolean startExport(Process process) throws IOException, InterruptedException, DocStructHasNoTypeException, PreferencesException,
-            WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
-            TypeNotAllowedForParentException {
+    WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
+    TypeNotAllowedForParentException {
 
         return startExport(process, null);
     }
 
     @Override
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
-            PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
-            SwapException, DAOException, TypeNotAllowedForParentException {
+    PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
+    SwapException, DAOException, TypeNotAllowedForParentException {
         problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
         String tempDestination = config.getString("tempDestination", "");
@@ -151,24 +149,63 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         if (Files.exists(imageMediaFolder)) {
             StorageProvider.getInstance().copyDirectory(imageMediaFolder, exportfolder);
             imageFileNames = StorageProvider.getInstance().list(process.getImagesTifDirectory(false), NIOFileUtils.fileFilter);
+
+            for (String filename : imageFileNames) {
+                Path source = Paths.get(imageMediaFolder.toString(), filename);
+                Path target = exportfolder.resolve(source.relativize(source));
+                long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
+                long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
+                if (checksumSrc != checksumDest) {
+                    Helper.setFehlerMeldung("Checksum error while validating images, aborting.");
+                    log.error("Checksum error while validating images: " + target.toString());
+                    problems.add("Checksum error while validating images: " + target.toString());
+                    return false;
+                }
+            }
         }
-        
+
         // copy all alto files from ocr folder
         Path ocrFolder = Paths.get(process.getOcrAltoDirectory());
         if (Files.exists(ocrFolder)) {
-        	StorageProvider.getInstance().copyDirectory(ocrFolder, exportfolder);
+            StorageProvider.getInstance().copyDirectory(ocrFolder, exportfolder);
             altoFileNames = StorageProvider.getInstance().list(process.getOcrAltoDirectory(), NIOFileUtils.fileFilter);
+
+            for (String filename : altoFileNames) {
+                Path source = Paths.get(ocrFolder.toString(), filename);
+                Path target = exportfolder.resolve(source.relativize(source));
+                long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
+                long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
+                if (checksumSrc != checksumDest) {
+                    Helper.setFehlerMeldung("Checksum error while validating alto files, aborting.");
+                    log.error("Checksum error while validating alto files: " + target.toString());
+                    problems.add("Checksum error while validating alto files: " + target.toString());
+                    return false;
+                }
+            }
+
         }
 
         // copy all pdf files
         Path pdfFolder = Paths.get(process.getOcrPdfDirectory());
         if (Files.exists(pdfFolder)) {
-        	StorageProvider.getInstance().copyDirectory(pdfFolder, exportfolder);
+            StorageProvider.getInstance().copyDirectory(pdfFolder, exportfolder);
             pdfFileNames = StorageProvider.getInstance().list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
+            for (String filename : pdfFileNames) {
+                Path source = Paths.get(pdfFolder.toString(), filename);
+                Path target = exportfolder.resolve(source.relativize(source));
+                long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
+                long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
+                if (checksumSrc != checksumDest) {
+                    Helper.setFehlerMeldung("Checksum error while validating pdf files, aborting.");
+                    log.error("Checksum error while validating pdf files: " + target.toString());
+                    problems.add("Checksum error while validating pdf files: " + target.toString());
+                    return false;
+                }
+            }
         }
-        
+
         // generate one big pdf for all single page PDFs
-        if (pdfFileNames!=null && pdfFileNames.size()>0) {
+        if (pdfFileNames != null && pdfFileNames.size() > 0) {
             mergePdfFiles(pdfFolder, pdfFileNames, exportfolder, objectId);
         }
 
@@ -181,12 +218,12 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         xmlOutput.output(document, new FileWriter(Paths.get(metadatafolder.toString(), metadataFileName).toString()));
 
         // if the xml shall be saved additional into a temporary folder
-        if (tempDestination!=null && tempDestination.length()>0) {
-	        xmlOutput = new XMLOutputter();
-	        xmlOutput.setFormat(Format.getPrettyFormat());
-	        xmlOutput.output(document, new FileWriter(Paths.get(tempDestination, "dor_export_" + objectId + ".xml").toString()));
+        if (tempDestination != null && tempDestination.length() > 0) {
+            xmlOutput = new XMLOutputter();
+            xmlOutput.setFormat(Format.getPrettyFormat());
+            xmlOutput.output(document, new FileWriter(Paths.get(tempDestination, "dor_export_" + objectId + ".xml").toString()));
         }
-        
+
         int delay = config.getInt("delay", 0);
         if (delay > 0) {
             TimeUnit.SECONDS.sleep(delay);
@@ -261,7 +298,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
                         pdfFile.setAttribute(nameString, pdfName);
                         resource.addContent(pdfFile);
                     }
-                    
+
                     // create alto entry
                     String altoName = altoFileNames.get(index);
                     Element altoFile = new Element(fileString);
@@ -308,8 +345,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
      * @param objectId
      * @throws IOException
      */
-    private void mergePdfFiles(Path pdfFolder, List<String> pdfFileNames, Path exportPath, String objectId)
-            throws IOException {
+    private void mergePdfFiles(Path pdfFolder, List<String> pdfFileNames, Path exportPath, String objectId) throws IOException {
         try {
             PDFMergerUtility PDFmerger = new PDFMergerUtility();
             String exportPdf = exportPath.toString() + File.separator + objectId + ".pdf";
@@ -317,7 +353,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             // add all pdf files
             for (String pdf : pdfFileNames) {
                 File file = new File(pdfFolder.toFile(), pdf);
-            		PDFmerger.addSource(file);
+                PDFmerger.addSource(file);
             }
             // merge the pdf files now
             PDFmerger.mergeDocuments();
@@ -325,7 +361,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             throw new IOException("Error occured during the merge to a single PDF file", e);
         }
     }
-    
+
     public static void main(String[] args) {
         String objectId = "druid:bb018zb8894";
         if (objectId.contains(":")) {

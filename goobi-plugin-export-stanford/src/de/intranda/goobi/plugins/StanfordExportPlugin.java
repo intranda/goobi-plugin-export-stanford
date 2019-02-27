@@ -152,7 +152,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
             for (String filename : imageFileNames) {
                 Path source = Paths.get(imageMediaFolder.toString(), filename);
-                Path target = exportfolder.resolve(source.relativize(source));
+                Path target = Paths.get( exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {
@@ -172,7 +172,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
             for (String filename : altoFileNames) {
                 Path source = Paths.get(ocrFolder.toString(), filename);
-                Path target = exportfolder.resolve(source.relativize(source));
+                Path target = Paths.get( exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {
@@ -192,7 +192,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             pdfFileNames = StorageProvider.getInstance().list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
             for (String filename : pdfFileNames) {
                 Path source = Paths.get(pdfFolder.toString(), filename);
-                Path target = exportfolder.resolve(source.relativize(source));
+                Path target = Paths.get( exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {

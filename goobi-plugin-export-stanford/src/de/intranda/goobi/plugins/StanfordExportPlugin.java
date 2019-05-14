@@ -232,6 +232,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         WebTarget base = client.target(apiBaseUrl);
         WebTarget target = base.path(originalObjectId).path(assemblyWF);
         Builder requestBuilder = target.request();
+        log.debug("Sending POST request to " + requestBuilder);
         //        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
         //            String token = username + ":" + password;
         //            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));

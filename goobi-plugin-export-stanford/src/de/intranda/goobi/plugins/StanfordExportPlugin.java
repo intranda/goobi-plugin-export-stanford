@@ -232,7 +232,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         WebTarget base = client.target(apiBaseUrl);
         WebTarget target = base.path(originalObjectId).path(assemblyWF);
         Builder requestBuilder = target.request();
-        log.debug("Sending POST request to " + requestBuilder);
+        log.debug("Sending POST request to " + target.getUri());
         //        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
         //            String token = username + ":" + password;
         //            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));
@@ -362,16 +362,23 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     }
 
     public static void main(String[] args) {
-        String objectId = "druid:bb018zb8894";
-        if (objectId.contains(":")) {
-            objectId = objectId.substring(objectId.indexOf(":") + 1);
-        }
-
-        String destination = "/assembly";
-        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
-                7), objectId, "content");
-
-        System.out.println(exportfolder.toString());
+        
+        Client client = ClientBuilder.newClient();
+        WebTarget base = client.target("https://bla/");
+        WebTarget target = base.path("blub").path("assemblyWF");
+        Builder requestBuilder = target.request();
+        System.out.println(target.getUri());
+        
+//        String objectId = "druid:bb018zb8894";
+//        if (objectId.contains(":")) {
+//            objectId = objectId.substring(objectId.indexOf(":") + 1);
+//        }
+//
+//        String destination = "/assembly";
+//        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
+//                7), objectId, "content");
+//
+//        System.out.println(exportfolder.toString());
     }
 
     @Override

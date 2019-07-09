@@ -16,10 +16,8 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.StatusType;
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang.StringUtils;
 import org.apache.pdfbox.util.PDFMergerUtility;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
@@ -89,8 +87,8 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         String assemblyWF = config.getString("assemblyWF", "assemblyWF");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
         String apiBaseUrl = config.getString("apiBaseUrl", "http://example.com/");
-        String username = config.getString("username", "");
-        String password = config.getString("password", "");
+        //        String username = config.getString("username", "");
+        //        String password = config.getString("password", "");
 
         String objectId = null;
         String contentType = null;
@@ -232,13 +230,14 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         // call api
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
-        WebTarget target = base.path(originalObjectId).path("apo_workflows").path(assemblyWF);
+        WebTarget target = base.path(originalObjectId).path(assemblyWF);
         Builder requestBuilder = target.request();
-        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-            String token = username + ":" + password;
-            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));
-            requestBuilder.header("Authorization", authenticationCode);
-        }
+        log.debug("Sending POST request to " + target.getUri());
+        //        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
+        //            String token = username + ":" + password;
+        //            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));
+        //            requestBuilder.header("Authorization", authenticationCode);
+        //        }
         Response response = requestBuilder.post(null);
         StatusType type = response.getStatusInfo();
         int statuscode = type.getStatusCode();
@@ -363,16 +362,23 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     }
 
     public static void main(String[] args) {
-        String objectId = "druid:bb018zb8894";
-        if (objectId.contains(":")) {
-            objectId = objectId.substring(objectId.indexOf(":") + 1);
-        }
-
-        String destination = "/assembly";
-        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
-                7), objectId, "content");
-
-        System.out.println(exportfolder.toString());
+        
+        Client client = ClientBuilder.newClient();
+        WebTarget base = client.target("https://bla/");
+        WebTarget target = base.path("blub").path("assemblyWF");
+        Builder requestBuilder = target.request();
+        System.out.println(target.getUri());
+        
+//        String objectId = "druid:bb018zb8894";
+//        if (objectId.contains(":")) {
+//            objectId = objectId.substring(objectId.indexOf(":") + 1);
+//        }
+//
+//        String destination = "/assembly";
+//        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
+//                7), objectId, "content");
+//
+//        System.out.println(exportfolder.toString());
     }
 
     @Override

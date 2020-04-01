@@ -70,16 +70,20 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     @Override
     public boolean startExport(Process process) throws IOException, InterruptedException, DocStructHasNoTypeException, PreferencesException,
-    WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
-    TypeNotAllowedForParentException {
+            WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
+            TypeNotAllowedForParentException {
 
         return startExport(process, null);
     }
 
     @Override
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
-    PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
-    SwapException, DAOException, TypeNotAllowedForParentException {
+            PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
+            SwapException, DAOException, TypeNotAllowedForParentException {
+
+        //sleep for 30 seconds, to allow the NFS in stanford to sync...
+        Thread.sleep(30 * 1000l);
+
         problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
         String tempDestination = config.getString("tempDestination", "");
@@ -150,7 +154,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
             for (String filename : imageFileNames) {
                 Path source = Paths.get(imageMediaFolder.toString(), filename);
-                Path target = Paths.get( exportfolder.toString(), filename);
+                Path target = Paths.get(exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {
@@ -170,7 +174,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
             for (String filename : altoFileNames) {
                 Path source = Paths.get(ocrFolder.toString(), filename);
-                Path target = Paths.get( exportfolder.toString(), filename);
+                Path target = Paths.get(exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {
@@ -190,7 +194,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             pdfFileNames = StorageProvider.getInstance().list(process.getOcrPdfDirectory(), NIOFileUtils.fileFilter);
             for (String filename : pdfFileNames) {
                 Path source = Paths.get(pdfFolder.toString(), filename);
-                Path target = Paths.get( exportfolder.toString(), filename);
+                Path target = Paths.get(exportfolder.toString(), filename);
                 long checksumSrc = StorageProvider.getInstance().checksumMappedFile(source.toString());
                 long checksumDest = StorageProvider.getInstance().checksumMappedFile(target.toString());
                 if (checksumSrc != checksumDest) {
@@ -362,23 +366,23 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
     }
 
     public static void main(String[] args) {
-        
+
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target("https://bla/");
         WebTarget target = base.path("blub").path("assemblyWF");
         Builder requestBuilder = target.request();
         System.out.println(target.getUri());
-        
-//        String objectId = "druid:bb018zb8894";
-//        if (objectId.contains(":")) {
-//            objectId = objectId.substring(objectId.indexOf(":") + 1);
-//        }
-//
-//        String destination = "/assembly";
-//        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
-//                7), objectId, "content");
-//
-//        System.out.println(exportfolder.toString());
+
+        //        String objectId = "druid:bb018zb8894";
+        //        if (objectId.contains(":")) {
+        //            objectId = objectId.substring(objectId.indexOf(":") + 1);
+        //        }
+        //
+        //        String destination = "/assembly";
+        //        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
+        //                7), objectId, "content");
+        //
+        //        System.out.println(exportfolder.toString());
     }
 
     @Override

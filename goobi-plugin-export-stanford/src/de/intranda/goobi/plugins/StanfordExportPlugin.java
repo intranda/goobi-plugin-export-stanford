@@ -70,16 +70,16 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     @Override
     public boolean startExport(Process process) throws IOException, InterruptedException, DocStructHasNoTypeException, PreferencesException,
-            WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
-            TypeNotAllowedForParentException {
+    WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
+    TypeNotAllowedForParentException {
 
         return startExport(process, null);
     }
 
     @Override
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
-            PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
-            SwapException, DAOException, TypeNotAllowedForParentException {
+    PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
+    SwapException, DAOException, TypeNotAllowedForParentException {
 
         //sleep for 30 seconds, to allow the NFS in stanford to sync...
         Thread.sleep(30 * 1000l);
@@ -88,11 +88,15 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
         String tempDestination = config.getString("tempDestination", "");
         destination = config.getString("destination", "/tmp");
-        String assemblyWF = config.getString("assemblyWF", "assemblyWF");
+        String endpoint = config.getString("endpoint", "accession");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
         String apiBaseUrl = config.getString("apiBaseUrl", "http://example.com/");
         //        String username = config.getString("username", "");
         //        String password = config.getString("password", "");
+
+        String accessTokenFile = config.getString("accessToken");
+
+        String authenticationCode = new String(Files.readAllBytes(Paths.get(accessTokenFile)));
 
         String objectId = null;
         String contentType = null;
@@ -234,14 +238,12 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         // call api
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
-        WebTarget target = base.path(originalObjectId).path(assemblyWF);
+        WebTarget target = base.path(originalObjectId).path(endpoint);
         Builder requestBuilder = target.request();
         log.debug("Sending POST request to " + target.getUri());
-        //        if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password)) {
-        //            String token = username + ":" + password;
-        //            String authenticationCode = "BASIC " + DatatypeConverter.printBase64Binary(token.getBytes("UTF-8"));
-        //            requestBuilder.header("Authorization", authenticationCode);
-        //        }
+
+        requestBuilder.header("TOKEN_HEADER", authenticationCode);
+
         Response response = requestBuilder.post(null);
         StatusType type = response.getStatusInfo();
         int statuscode = type.getStatusCode();

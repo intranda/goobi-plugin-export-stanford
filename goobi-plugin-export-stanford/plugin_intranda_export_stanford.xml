@@ -4,8 +4,9 @@
 	<tempDestination>/tmp</tempDestination>
 	<!-- this is the main folder where the result is exported to -->
 	<destination>/tmp</destination>
-	<assemblyWFName>workflows/assemblyWF</assemblyWFName>	
 	<metadataFileName>stubContentMetadata.xml</metadataFileName>
 	<apiBaseUrl>http://example.com/</apiBaseUrl>
     <delay>10</delay>
+	<endpoint>accession</endpoint>	
+    <accessToken>/opt/digiverso/goobi/config/token.txt</accessToken>
 </config_plugin>

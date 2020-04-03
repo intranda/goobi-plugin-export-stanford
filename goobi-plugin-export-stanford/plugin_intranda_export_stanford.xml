@@ -8,5 +8,5 @@
 	<apiBaseUrl>http://example.com/</apiBaseUrl>
     <delay>10</delay>
 	<endpoint>accession</endpoint>	
-    <accessToken>/opt/digiverso/goobi/config/token.txt</accessToken>
+    <accessToken>Bearer abcdefghijklmnopqrstuvwxyz</accessToken>
 </config_plugin>

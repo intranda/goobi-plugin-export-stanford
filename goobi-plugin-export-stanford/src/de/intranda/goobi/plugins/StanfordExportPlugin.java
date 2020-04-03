@@ -94,9 +94,8 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         //        String username = config.getString("username", "");
         //        String password = config.getString("password", "");
 
-        String accessTokenFile = config.getString("accessToken");
+        String accessToken = config.getString("accessToken");
 
-        String authenticationCode = new String(Files.readAllBytes(Paths.get(accessTokenFile)));
 
         String objectId = null;
         String contentType = null;
@@ -242,7 +241,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Builder requestBuilder = target.request();
         log.debug("Sending POST request to " + target.getUri());
 
-        requestBuilder.header("TOKEN_HEADER", authenticationCode);
+        requestBuilder.header("TOKEN_HEADER", accessToken);
 
         Response response = requestBuilder.post(null);
         StatusType type = response.getStatusInfo();

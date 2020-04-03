@@ -237,7 +237,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         // call api
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
-        WebTarget target = base.path(originalObjectId).path(endpoint);
+        WebTarget target = base.path(objectId).path(endpoint);
         Builder requestBuilder = target.request();
         log.debug("Sending POST request to " + target.getUri());
 

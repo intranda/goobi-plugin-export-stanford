@@ -241,7 +241,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Builder requestBuilder = target.request();
         log.debug("Sending POST request to " + target.getUri());
 
-        requestBuilder.header("TOKEN_HEADER", accessToken);
+        requestBuilder.header("Authorization", accessToken);
 
         Response response = requestBuilder.post(null);
         StatusType type = response.getStatusInfo();

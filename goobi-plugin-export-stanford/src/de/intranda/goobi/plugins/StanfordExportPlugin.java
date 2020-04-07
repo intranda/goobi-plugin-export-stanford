@@ -252,7 +252,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         if (!queryParameter.isEmpty()) {
             for (StringPair sp : queryParameter) {
-                target.queryParam(sp.getOne(), sp.getTwo());
+                target = target.queryParam(sp.getOne(), sp.getTwo());
             }
         }
 
@@ -386,11 +386,10 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     public static void main(String[] args) {
 
-
         XMLConfiguration config = ConfigPlugins.getPluginConfig("intranda_export_stanford");
         config.setExpressionEngine(new XPathExpressionEngine());
         String tempDestination = config.getString("tempDestination", "");
-        String   destination = config.getString("destination", "/tmp");
+        String destination = config.getString("destination", "/tmp");
         String endpoint = config.getString("endpoint", "accession");
         String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
         String apiBaseUrl = config.getString("apiBaseUrl");
@@ -405,10 +404,20 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         }
         System.out.println(apiBaseUrl);
         for (StringPair sp : queryParameter) {
-            System.out.println(sp.getOne() +": " + sp.getTwo());
+            System.out.println(sp.getOne() + ": " + sp.getTwo());
         }
 
+        Client client = ClientBuilder.newClient();
+        WebTarget base = client.target(apiBaseUrl);
+        WebTarget target = base.path("druid:123int4567").path(endpoint);
 
+        if (!queryParameter.isEmpty()) {
+            for (StringPair sp : queryParameter) {
+                target = target.queryParam(sp.getOne(), sp.getTwo());
+            }
+        }
+
+        System.out.println("Sending POST request to " + target.getUri());
     }
 
     @Override

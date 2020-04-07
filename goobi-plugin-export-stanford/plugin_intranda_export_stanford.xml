@@ -9,4 +9,7 @@
     <delay>10</delay>
 	<endpoint>accession</endpoint>	
     <accessToken>Bearer abcdefghijklmnopqrstuvwxyz</accessToken>
+    <queryParameter name="description" value="reaccession-via-goobi" />
+    <queryParameter name="opening_user_name" value="goobi" />
+    <queryParameter name="significance" value="major" />
 </config_plugin>

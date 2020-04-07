@@ -17,10 +17,13 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.StatusType;
 
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.pdfbox.util.PDFMergerUtility;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
+import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IExportPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
@@ -86,6 +89,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         problems = new ArrayList<>();
         XMLConfiguration config = ConfigPlugins.getPluginConfig(getTitle());
+        config.setExpressionEngine(new XPathExpressionEngine());
         String tempDestination = config.getString("tempDestination", "");
         destination = config.getString("destination", "/tmp");
         String endpoint = config.getString("endpoint", "accession");
@@ -96,6 +100,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
         String accessToken = config.getString("accessToken");
 
+        List<HierarchicalConfiguration> conf = config.configurationsAt("queryParameter");
+        List<StringPair> queryParameter = new ArrayList<>();
+        if (conf != null) {
+            for (HierarchicalConfiguration hc : conf) {
+                queryParameter.add(new StringPair(hc.getString("@name"), hc.getString("@value")));
+            }
+        }
 
         String objectId = null;
         String contentType = null;
@@ -132,8 +143,8 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
             //            String secondPart = objectId.substring(2, 5);
             //            String thirdPart = objectId.substring(5, 7);
             //            String forthPart = objectId.substring(7);
-            exportRootFolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId
-                    .substring(7), objectId);
+            exportRootFolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7),
+                    objectId.substring(7), objectId);
         } else {
             Helper.setFehlerMeldung("ObjectId has unexpected length, aborting.");
             log.error("ObjectId has unexpected length, export canceled: " + process.getTitel());
@@ -238,6 +249,13 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         Client client = ClientBuilder.newClient();
         WebTarget base = client.target(apiBaseUrl);
         WebTarget target = base.path(originalObjectId).path(endpoint);
+
+        if (!queryParameter.isEmpty()) {
+            for (StringPair sp : queryParameter) {
+                target.queryParam(sp.getOne(), sp.getTwo());
+            }
+        }
+
         Builder requestBuilder = target.request();
         log.debug("Sending POST request to " + target.getUri());
 
@@ -368,22 +386,29 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     public static void main(String[] args) {
 
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target("https://bla/");
-        WebTarget target = base.path("blub").path("assemblyWF");
-        Builder requestBuilder = target.request();
-        System.out.println(target.getUri());
 
-        //        String objectId = "druid:bb018zb8894";
-        //        if (objectId.contains(":")) {
-        //            objectId = objectId.substring(objectId.indexOf(":") + 1);
-        //        }
-        //
-        //        String destination = "/assembly";
-        //        Path exportfolder = Paths.get(destination, objectId.substring(0, 2), objectId.substring(2, 5), objectId.substring(5, 7), objectId.substring(
-        //                7), objectId, "content");
-        //
-        //        System.out.println(exportfolder.toString());
+        XMLConfiguration config = ConfigPlugins.getPluginConfig("intranda_export_stanford");
+        config.setExpressionEngine(new XPathExpressionEngine());
+        String tempDestination = config.getString("tempDestination", "");
+        String   destination = config.getString("destination", "/tmp");
+        String endpoint = config.getString("endpoint", "accession");
+        String metadataFileName = config.getString("metadataFileName", "stubContentMetadata.xml");
+        String apiBaseUrl = config.getString("apiBaseUrl");
+        String accessToken = config.getString("accessToken");
+
+        List<HierarchicalConfiguration> conf = config.configurationsAt("queryParameter");
+        List<StringPair> queryParameter = new ArrayList<>();
+        if (conf != null) {
+            for (HierarchicalConfiguration hc : conf) {
+                queryParameter.add(new StringPair(hc.getString("@name"), hc.getString("@value")));
+            }
+        }
+        System.out.println(apiBaseUrl);
+        for (StringPair sp : queryParameter) {
+            System.out.println(sp.getOne() +": " + sp.getTwo());
+        }
+
+
     }
 
     @Override

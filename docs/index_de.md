@@ -11,13 +11,13 @@ Die vorliegende Dokumentation beschreibt die Installation, die Konfiguration und
 ## Installation
 Um das Plugin nutzen zu können, müssen folgende Dateien installiert werden:
 
-```xml
+```bash
 /opt/digiverso/goobi/plugins/export/plugin_intranda_export_stanford.jar
 ```
 
 Daneben gibt es eine Konfigurationsdatei, die an folgender Stelle liegen muss:
 
-```xml
+```bash
 /opt/digiverso/goobi/config/plugin_intranda_export_stanford.xml
 ```
 
@@ -50,11 +50,11 @@ Die folgende Tabelle enthält eine Zusammenstellung der Parameter und ihrer Besc
 
 Parameter               | Erläuterung
 ------------------------|------------------------------------
-|  `tempDestination` | Wenn das Element vorhanden und nicht leer ist, werden die Metadaten in diesen Ordner als 'dor_export_{objectId}.xml geschrieben |
+|  `tempDestination` | Wenn das Element vorhanden und nicht leer ist, werden die Metadaten in diesen Ordner als `dor_export_{objectId}.xml` geschrieben |
 | `destination` | Root Verzeichnis für die exportierten Daten |
-| `metadataFileName` | Name der Metadaten Datei, enthält Einträge zu jeder exportierten Datei |
-| `dela` | Wenn das Element vorhanden ist und eine Zahl größer 0 enthält, wird nach dem erfolgreichen Export die konfigurierte Anzahl an Sekunden gewartet, bevor die Rest API aufgerufen wird |
-| `apiBaseUrl` | Basis URL zur Rest API |
-| `endpoint` | Endpoint zur Rest API |
-| `accessToken` | enthält den token, der für die Authentifizierung der Rest API benötigt wird |
-| `queryParameter` | Enthält in den Attributen `name` und `value` einen query Parameter, der zusätzlich als `&name=value` an die URL angehängt wird. Das Feld ist wiederholbar. |
+| `metadataFileName` | Name der Metadaten-Datei, enthält Einträge zu jeder exportierten Datei |
+| `dela` | Wenn das Element vorhanden ist und eine Zahl größer `0` enthält, wird nach dem erfolgreichen Export die konfigurierte Anzahl an Sekunden gewartet, bevor die Rest-API aufgerufen wird |
+| `apiBaseUrl` | Basis-URL zur Rest-API |
+| `endpoint` | Endpoint zur Rest-API |
+| `accessToken` | Token, der für die Authentifizierung der Rest API benötigt wird |
+| `queryParameter` | Enthält in den Attributen `name` und `value` einen query-Parameter, der zusätzlich als `&name=value` an die URL angehängt wird. Das Feld ist wiederholbar. |

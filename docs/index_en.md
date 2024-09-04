@@ -11,13 +11,13 @@ The present documentation describes the installation, configuration, and use of 
 ## Installation
 To be able to use the plugin, the following files must be installed:
 
-```xml
+```bash
 /opt/digiverso/goobi/plugins/export/plugin_intranda_export_stanford.jar
 ```
 
 In addition, there is a configuration file that must be located at the following location:
 
-```xml
+```bash
 /opt/digiverso/goobi/config/plugin_intranda_export_stanford.xml
 ```
 
@@ -51,7 +51,7 @@ The following table contains a summary of the parameters and their descriptions:
 
 Parameter               | Explanation
 ------------------------|------------------------------------
-| `tempDestination`  | If this element is present and not empty, the metadata will be written to this folder as `dor_export_{objectId}.xml`.                                |
+| `tempDestination`  | If this element is present and not empty, the metadata will be written to this folder as `dor_export_{objectId}`.xml`.                                |
 | `destination`      | Root directory for the exported data.                                                                                                               |
 | `metadataFileName` | Name of the metadata file, containing entries for each exported file.                                                                               |
 | `dela`             | If this element is present and contains a number greater than 0, the configured number of seconds will be waited after successful export before calling the REST API. |

@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
+import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
@@ -73,16 +74,16 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
 
     @Override
     public boolean startExport(Process process) throws IOException, InterruptedException, DocStructHasNoTypeException, PreferencesException,
-    WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
-    TypeNotAllowedForParentException {
+            WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException, SwapException, DAOException,
+            TypeNotAllowedForParentException {
 
         return startExport(process, null);
     }
 
     @Override
     public boolean startExport(Process process, String destination) throws IOException, InterruptedException, DocStructHasNoTypeException,
-    PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
-    SwapException, DAOException, TypeNotAllowedForParentException {
+            PreferencesException, WriteException, MetadataTypeNotAllowedException, ExportFileException, UghHelperException, ReadException,
+            SwapException, DAOException, TypeNotAllowedForParentException {
 
         //sleep for 30 seconds, to allow the NFS in stanford to sync...
         Thread.sleep(30 * 1000l);
@@ -378,7 +379,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
                 PDFmerger.addSource(file);
             }
             // merge the pdf files now
-            PDFmerger.mergeDocuments();
+            PDFmerger.mergeDocuments(IOUtils.createMemoryOnlyStreamCache());
         } catch (Exception e) {
             throw new IOException("Error occured during the merge to a single PDF file", e);
         }

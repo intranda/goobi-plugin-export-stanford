@@ -10,20 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.StatusType;
-
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.pdfbox.io.IOUtils;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.goobi.beans.GoobiProperty;
 import org.goobi.beans.Process;
-import org.goobi.beans.Processproperty;
 import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IExportPlugin;
@@ -41,6 +34,12 @@ import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.ExportFileException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.helper.exceptions.UghHelperException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.StatusType;
 import lombok.extern.log4j.Log4j;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.exceptions.DocStructHasNoTypeException;
@@ -114,7 +113,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
         String resourceType = null;
         Path exportRootFolder;
 
-        for (Processproperty property : process.getEigenschaften()) {
+        for (GoobiProperty property : process.getEigenschaften()) {
             if (property.getTitel().equalsIgnoreCase("objectId")) {
                 objectId = property.getWert();
             } else if (property.getTitel().equalsIgnoreCase("contentType")) {
@@ -334,8 +333,7 @@ public class StanfordExportPlugin implements IExportPlugin, IPlugin {
                 }
 
             } else {
-                for (int index = 0; index < imageFileNames.size(); index++) {
-                    String imageName = imageFileNames.get(index);
+                for (String imageName : imageFileNames) {
                     Element resource = new Element(resourceString);
                     content.addContent(resource);
                     // create Label?

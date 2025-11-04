@@ -3,6 +3,10 @@ title: Stanford Export
 identifier: intranda_export_standford
 description: Goobi Plugin for the Export of Goobi Processes to the Stanford University Digital Library
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Export Plugin
 ---
 
 ## Introduction

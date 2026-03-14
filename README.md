@@ -15,8 +15,8 @@ Detail                      | Description
 **Plugin identifier**       | intranda_export_standford
 **Plugin type**             | export
 **Licence**                 | GPL 2.0 or newer
-**Documentation (German)**  | https://docs.goobi.io/workflow-plugins/v/ger/export/goobi-plugin-export-stanford
-**Documentation (English)** | https://docs.goobi.io/workflow-plugins/v/eng/export/goobi-plugin-export-stanford
+**Documentation (German)**  | https://docs.goobi.io/de/workflow/plugins/export/goobi-plugin-export-stanford
+**Documentation (English)** | https://docs.goobi.io/en/workflow/plugins/export/goobi-plugin-export-stanford
 
 ## Goobi details
 
